@@ -1,8 +1,8 @@
 from config import *
 import re
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 import urllib, sys
-import pythonwhois
+import whois
 import pprint
 import tldextract
 
@@ -20,7 +20,8 @@ def __getpayload_rec__(msg, payloadresult):
         for subMsg in payload:
             payloadresult += __getpayload_rec__(subMsg, payloadresult)
     else:
-        return msg.get_content_type() + "\t" + payload + "\n"
+        #return msg.get_content_type() + "\t" + str(payload) + "\n"
+        return str(payload)
     return payloadresult
 
 
@@ -121,7 +122,7 @@ def getjavascriptusage(message):
     for part in payload:
         if part["mimeType"].lower() == "text/html":
             htmlcontent = part["payload"]
-            soup = BeautifulSoup(htmlcontent)
+            soup = BeautifulSoup(htmlcontent, features="lxml")
             scripts = soup.findAll("script")
             for script in scripts:
                 result.append(script)
@@ -138,7 +139,7 @@ def getcssusage(message):
     for part in payload:
         if part["mimeType"].lower() == "text/html":
             htmlcontent = part["payload"]
-            soup = BeautifulSoup(htmlcontent)
+            soup = BeautifulSoup(htmlcontent, features="lxml")
             csslinks = soup.findAll("link")
             for css in csslinks:
                 result.append(css)
@@ -198,14 +199,14 @@ def extract_registered_domain(url):
 
 def get_whois_data(url):
     domain = extract_registered_domain;
-    return pythonwhois.get_whois(domain)
+    return whois.whois(domain)
 
 
 def ishtml(message):
     result = ("text/html" in getContentTypes(message))
     payload = getpayload_dict(message)
     for part in payload:
-        if result or BeautifulSoup(part["payload"]).find():
+        if result or BeautifulSoup(part["payload"], features="lxml").find():
             return True
     return result
 
