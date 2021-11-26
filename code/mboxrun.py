@@ -219,8 +219,8 @@ def processFile(filepath, phishy=True, limit=500):
 
 
 def mboxtests():
-    processFile("emails-phishing.mbox", limit=2000)
-    processFile("emails-enron.mbox", limit=2000, phishy=False)
+    processFile("resources/emails-phishing.mbox", limit=2000)
+    processFile("resources/emails-enron.mbox", limit=2000, phishy=False)
 
 
 mboxtests()
