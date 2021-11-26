@@ -5,7 +5,7 @@ import pandas as pd
 import re
 import csv
 from config import *
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 
 # Internal features
 
@@ -192,7 +192,7 @@ def processFile(filepath, phishy=True, limit=500):
                 totalsize += len(re.sub(r'\s+','',part["payload"]))
 
         if totalsize < 1:
-            print "empty email - "+str(phishy)+" - "+utils.getpayload(message)
+            print("empty email - "+str(phishy)+" - "+utils.getpayload(message))
             continue
 
         for finder in finders:
@@ -201,24 +201,26 @@ def processFile(filepath, phishy=True, limit=500):
         data.append(dict)
 
         email_fields = {}
-        email_fields["id"] = i
-        email_fields["message"] = utils.getpayload(message)
-        email_fields["raw"] = str(message)
+        email_fields["ID"] = i
+        email_fields["Content Type"] = message.get_content_type()
+        email_fields["Message"] = utils.getpayload(message)
+        email_fields["Phishy"] = phishy
         email_index.append(email_fields)
+
         i += 1
-        if limit and i >= limit:
+        if limit and i > limit:
             break
 
     df = pd.DataFrame(data)
-    df.to_csv(filepath + "-export", quoting=csv.QUOTE_ALL)
+    df.to_csv(filepath + "-features.csv", quoting=csv.QUOTE_ALL, index=False)
 
     emails = pd.DataFrame(email_index)
-    emails.to_csv(filepath + "-export-index.csv")
+    emails.to_csv(filepath + ".csv", quoting=csv.QUOTE_ALL, index=False)
 
 
 def mboxtests():
-    processFile("resources/phishing3.mbox", limit=2279)
-    processFile("resources/enron-2279-mbox.mbox", limit=2257, phishy=False)
+    processFile("emails-phishing.mbox", limit=2000)
+    processFile("emails-enron.mbox", limit=2000, phishy=False)
 
 
 mboxtests()
